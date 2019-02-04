@@ -1,0 +1,755 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Bootstrap, гладкий, интуитивно понятный и мощный mobile first фронт-енд framework для быстрой и простой веб-разработки.">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <!-- Bootstrap is included in its original form, unaltered -->
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/plugins.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <title>
+STEK
+</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//api.bitrix24.com/api/v1/"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/moment.js"></script>
+
+
+</head>
+<body>
+
+<div id="example-datatables2_wrapper" class="dataTables_wrapper form-inline no-footer">
+        <div class="row" id="global-menu">
+            <div class="col-sm-2 col-xs-5">
+                <div class="dataTables_length" id="example-datatables2_length">Период: <select
+                        name="example-datatables2_length" aria-controls="example-datatables2" id="selectData" class="form-control">
+                    <option value="week">Неделя</option>
+                    <option value="month" selected>Месяц</option>
+                    <option value="quarter">Квартал</option>
+                    <option value="year">Год</option>
+                </select></div>
+            </div>
+            <div class="col-sm-2 col-xs-2">
+                <div class="dataTables_length" ><div class="checkbox">
+                    <a class="btn btn-primary" href="#" onclick="start()" role="button">Поиск</a>
+
+                </div>
+                </div>
+            </div>
+
+            <div class="col-sm-2 col-xs-2">
+                <div class="dataTables_length" ><div class="checkbox">
+                    <label for="inp_task">
+                        <input type="checkbox" checked  id="inp_task" name="val_terms" value="1"> Задачи и проекты
+                    </label>
+                </div>
+                </div>
+            </div>
+            <div class="col-sm-1 col-xs-1">
+                <div class="dataTables_length" ><div class="checkbox">
+                    <label for="inp_crm">
+                        <input type="checkbox" id="inp_crm" checked  name="val_terms" value="1"> CRM
+                    </label>
+                </div>
+                </div>
+            </div>
+            <div class="col-sm-2 col-xs-2">
+                <div class="dataTables_length" ><div class="checkbox">
+                    <label for="inp_fillet">
+                        <input type="checkbox" checked  id="inp_fillet" name="val_terms" value="1"> Живая лента
+                    </label>
+                </div>
+                </div>
+            </div>
+        </div>
+    <div id="sub-menu" class="row" style="display: none">
+        <div class="col-sm-2 col-xs-2">
+            <div class="dataTables_length" ><div class="checkbox">
+                <a class="btn btn-primary" href="#" onclick="back()" role="button">Назад</a>
+
+            </div>
+            </div>
+        </div>
+    </div>
+        <table id="content-table" class="table table-striped table-bordered table-hover dataTable no-footer"
+               role="grid" aria-describedby="example-datatables2_info">
+            <!--<tr role="row"><th class="text-center sorting_asc" tabindex="0" aria-controls="example-datatables2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="#: activate to sort column descending" style="width: 74px;">#</th><th class="sorting" tabindex="0" aria-controls="example-datatables2" rowspan="1" colspan="1" aria-label=" Username: activate to sort column ascending" style="width: 251px;"><i class="fa fa-user"></i> Username</th><th class="sorting" tabindex="0" aria-controls="example-datatables2" rowspan="1" colspan="1" aria-label=" Status: activate to sort column ascending" style="width: 324px;"><i class="fa fa-bolt"></i> Status</th></tr>-->
+            <thead>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    <table id="sub-content-table" style="display: none" class="table table-striped table-bordered table-hover dataTable no-footer"  role="grid" aria-describedby="example-datatables2_info">
+         <thead>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+<script>
+    tasksContent=[];
+    leadsContent=[];
+    dealsContent=[];
+    contactsContent=[];
+    activitysContent=[];
+    blogpostsContent=[];
+domain = ""
+    function start() {
+        tasksContent=[];
+        today = new Date;
+        console.log(moment(today).subtract('days', 7).unix())
+        if($('#selectData option:selected').val()=="week"){
+            today = moment(today).subtract('days', 7).unix()
+
+        }
+        else if($('#selectData option:selected').val()=="month"){
+            today = moment(today).subtract('months', 1).unix()
+
+        }
+        else if($('#selectData option:selected').val()=="quarter"){
+            today = moment(today).subtract('months', 3).unix()
+
+        }
+        else if($('#selectData option:selected').val()=="year"){
+            today = moment(today).subtract('months', 12).unix()
+
+        }
+        $("#content-table thead").empty()
+
+        tableHeadContent = '<tr role="row" class="odd">\n'
+
+            tableHeadContent+= '<td rowspan="2" style="vertical-align: middle;" class="text-center"><strong>Сотрудник</strong></td>\n'
+        if ($('#inp_task').is(':checked')) {
+            tableHeadContent+= '<td rowspan="2" style="vertical-align: middle;" class="text-center sorting_asc"><strong>Задач в работе</strong></td>\n' +
+                '                <td rowspan="2" style="vertical-align: middle;" class="text-center sorting_asc"><strong>Задач выполнено</strong></td>\n' +
+                '                <td rowspan="2" style="vertical-align: middle;" class="text-center sorting_asc"><strong>Участвует в проектах за период</strong></td>\n'
+        }
+            if ($('#inp_crm').is(':checked')){
+            tableHeadContent+='<td colspan="4" style="vertical-align: middle;" class="text-center sorting_asc"><strong>CRM</strong></td>\n'
+
+        }
+        if ($('#inp_fillet').is(':checked')){
+           tableHeadContent+='<td rowspan="2" style="vertical-align: middle;" class="text-center sorting_asc"><strong>Участие в живой ленте</strong></td>\n'
+        }
+        tableHeadContent+='</tr>\n' +
+            '<tr role="row" class="odd">\n'
+
+        if ($('#inp_crm').is(':checked')){
+            tableHeadContent+= '<td class="text-center" style="vertical-align: middle;"><strong>Лиды</strong></td>\n' +
+                '                <td class="text-center" style="vertical-align: middle;"><strong>Сделки</strong></td>\n' +
+                '                <td class="text-center" style="vertical-align: middle;"><strong>Контакты и компании</strong></td>\n' +
+                '                <td class="text-center" style="vertical-align: middle;"><strong>Дела</strong></td>'
+        }
+        tableHeadContent+='</tr>'
+        $("#content-table thead").append(tableHeadContent);
+
+        //
+        // "from"=> "2018-09-10",
+        //     "to"=> "2018-10-24",
+
+        $("#content-table tbody").empty()
+        BX24.init(function () {
+            request = "";
+            request = {
+                user: [],
+                tasks: [],
+                groups: [],
+                leads: [],
+                deals: [],
+                companys: [],
+                contacts: [],
+                blogpost: [],
+                activity: []
+            };
+            domain = BX24.getAuth().domain;
+            console.log(BX24.getAuth().domain);
+
+
+        //     getTasks = function (callback) {
+        //         BX24.callMethod(
+        //             'task.item.list',
+        //             [],
+        //             function (result) {
+        //                 request.tasks = request.tasks.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getGroups, 'tasks'), 1000);
+        //                 }
+        //             }
+        //         );
+        //     }
+        //     getGroups = function(callback) {
+        //         groups = [];
+        //     BX24.callMethod(
+        //         'sonet_group.get',
+        //         [],
+        //         function (result) {
+        //             groups = groups.concat(result.data());
+        //             if (result.more()) {
+        //                 result.next();
+        //             }
+        //             else {
+        //                 groups.forEach(function (item) {
+        //
+        //                     BX24.callMethod('sonet_group.user.get', {
+        //                             'ID': item['ID']
+        //                         },
+        //                         function (result) {
+        //                             item['GROUPSET'] = result.data();
+        //
+        //                         });
+        //                     // console.log(item['ID'])
+        //
+        //                     request.groups.push(item);
+        //                 })
+        //                 setTimeout(callback(getActivity, 'groups'), 1000);
+        //
+        //             }
+        //
+        //         }
+        //     );
+        //
+        // }
+        //     getActivity = function(callback) {
+        //
+        //         BX24.callMethod(
+        //             "crm.activity.list",
+        //             [],
+        //             function (result) {
+        //                 request.activity = request.activity.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getLeads, 'activitys'), 1000);
+        //                 }
+        //
+        //             }
+        //         );
+        //
+        //     }
+        //
+        //     getLeads = function(callback) {
+        //
+        //         BX24.callMethod(
+        //             "crm.lead.list",
+        //             [],
+        //             function (result) {
+        //                 request.leads = request.leads.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getDeals, 'leads'), 1000);
+        //                 }
+        //             }
+        //         );
+        //
+        //     }
+        //     getDeals = function(callback) {
+        //
+        //         BX24.callMethod(
+        //             "crm.deal.list",
+        //             [],
+        //             function (result) {
+        //                 request.deals = request.deals.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getCompanys, 'deals'), 1000);
+        //                 }
+        //             }
+        //         );
+        //     }
+        //
+        //     getCompanys = function(callback) {
+        //
+        //         BX24.callMethod(
+        //             "crm.company.list",
+        //             [],
+        //             function (result) {
+        //                 request.companys = request.companys.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getContact, 'companys'), 1000);
+        //                 }
+        //             }
+        //         );
+        //     }
+        //     getContact = function(callback) {
+        //         BX24.callMethod(
+        //             "crm.contact.list",
+        //             [],
+        //             function (result) {
+        //                 request.contacts = request.contacts.concat(result.data());
+        //                 if (result.more()) {
+        //                     result.next();
+        //                 }
+        //                 else {
+        //                     setTimeout(callback(getBlogpost, 'contacts'), 1000);
+        //                 }
+        //             }
+        //         )
+        //     }
+        //     getBlogpost =  function(callback){
+        //     BX24.callMethod(
+        //         'log.blogpost.get',
+        //         [],
+        //         function (result) {
+        //             request.blogpost = request.blogpost.concat(result.data());
+        //             if (result.more()) {
+        //                 result.next();
+        //             }
+        //             else {
+        //                 setTimeout(callback(proc, 'blogpost'), 1000);
+        //             }
+        //         });
+        //
+        // }
+        //
+        //     callback = function (fn, type) {
+        //         console.log(type + ' Loading ...')
+        //         setTimeout(fn(callback), 1000);
+        //
+        //     }
+        //     console.log(request)
+        //     getTasks(callback) // начать с этого значения
+        //
+
+
+        function requestBatch(type) {
+            BX24.callBatch(type, function (result) {
+                newType = {}
+                for (var key in type) {
+                    // console.log(result[key].data())
+                    // console.log(result[key].answer.next)
+                    console.log(result[key].data())
+                    request[key] = request[key].concat(result[key].data());
+                    if(result[key].answer.next){
+                        newType[key] = type[key]
+                        newType[key][1]['start']+=50;
+                        // newType[key].push({start: result[key].answer.next})
+                    }
+
+                }
+console.log($.isEmptyObject(newType))
+                if(!$.isEmptyObject(newType)){
+                    setTimeout(requestBatch(newType), 500)
+                }
+                else{
+                    console.log('Done')
+                   proc()
+                }
+            });
+        }
+
+
+        type = {
+                tasks: ['task.item.list',{start: 0}],
+                    contacts: ['crm.contact.list',{start: 0}],
+            groups: ['sonet_group.get',{start: 0}],
+            activity: ['crm.activity.list',{start: 0}],
+            leads: ['crm.lead.list',{start: 0}],
+            deals: ['crm.deal.list',{start: 0}],
+            companys: ['crm.company.list',{start: 0}],
+            contacts: ['crm.contact.list',{start: 0}],
+            blogpost: ['log.blogpost.get',{start: 0}],
+        }
+        requestBatch(type)
+            console.log(request)
+            proc = function (){
+            BX24.callMethod('user.current', {}, function (res) {
+                // console.log(res.data());
+                deportament = res.data()["UF_DEPARTMENT"];
+                BX24.callMethod(
+                    "user.get",
+                    {
+                        filter: {"UF_DEPARTMENT": deportament}
+                    },
+                    function (res) {
+                        usersId = [];
+                        // console.log(res.data())
+                        res.data().forEach(function (item) {
+                            // console.log(item)
+                            tasks = {do: 0, end: 0, id: []};
+                            request.tasks.forEach(function (task) {
+                                dateCreate = task['CREATED_DATE'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+                                    if (task['RESPONSIBLE_ID'] == item['ID']) {
+                                        tasksContent.push(task)
+                                        tasks.id.push(task['GROUP_ID'])
+                                        if (task['STATUS'] == 5) {
+                                            tasks.end++
+                                        }
+                                        else {
+                                            tasks.do++
+                                        }
+                                    }
+                                }
+
+                            })
+                            groupList = ""
+
+
+                            request.groups.forEach(function (groupAr) {
+                                if (groupAr['GROUPSET']) {
+                                    groupAr['GROUPSET'].forEach(function (groupSetAr) {
+                                        // console.log(groupSetAr['USER_ID'])
+                                        if (item['ID'] == groupSetAr['USER_ID']) {
+                                            // console.log(groupAr['NAME'])
+                                            if (groupAr['ID'] in tasks.id) {
+                                                groupList += '<li><a href="https://' + domain + '/workgroups/group/' + groupAr['ID'] + '">' + groupAr['NAME'] + '</a></li>'
+                                            }
+                                        }
+                                    })
+                                }
+                            })
+                            contacts = 0;
+                            request.contacts.forEach(function (item2) {
+
+                                dateCreate = item2['DATE_CREATE'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+                                    if (item2['CREATED_BY_ID'] == item['ID']) {
+                                        contactsContent.push(item2)
+
+                                        contacts++;
+                                    }
+                                }
+
+                            })
+
+                            leads = {open: 0, close: 0}
+                            request.leads.forEach(function (item2) {
+                                dateCreate = item2['DATE_CREATE'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+
+                                    if (item2['CREATED_BY_ID'] == item['ID']) {
+                                        leadsContent.push(item2)
+                                        leads.open++;
+                                        if (item2['OPENED'] !== 'Y') {
+                                            leads.close++
+                                        }
+                                    }
+                                }
+
+
+                            })
+
+                            deals = {open: 0, close: 0}
+                            request.deals.forEach(function (item2) {
+
+                                dateCreate = item2['DATE_CREATE'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+
+                                    if (item2['CREATED_BY_ID'] == item['ID']) {
+                                        dealsContent.push(item2)
+                                        deals.open++;
+                                        if (item2['CLOSED'] !== 'Y') {
+                                            deals.close++
+                                        }
+                                    }
+
+                                }
+                            })
+
+
+                            activity = {open: 0, close: 0}
+                            request.activity.forEach(function (item2) {
+                                dateCreate = item2['CREATED'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+                                    if (item2['AUTHOR_ID'] == item['ID']) {
+                                        activitysContent.push(item2)
+                                        activity.open++;
+                                        if (item2['STATUS'] == '2') {
+                                            activity.close++
+                                        }
+                                    }
+
+                                }
+                            })
+                            blogpost = 0
+                            request.blogpost.forEach(function (item2) {
+                                dateCreate = item2['DATE_PUBLISH'].split('T')
+                                // console.log(moment(dateCreate[0]).unix())
+
+                                if (moment(dateCreate[0]).unix() >= today) {
+                                    if (item2['AUTHOR_ID'] == item['ID']) {
+                                        blogpostsContent.push(item2)
+                                        blogpost++;
+                                    }
+                                }
+                            })
+                            let newRowContent = ' <tr class="even">\n'
+
+                            newRowContent += '<td class="text-center"><a href="https://' + domain + '/company/personal/user/' + item['ID'] + '/" target="_blank">' + item["NAME"] + ' ' + item["LAST_NAME"] + '</a></td>'
+
+                            if ($('#inp_task').is(':checked')) {
+                                newRowContent += '                <td class="text-center"><a href="#" data-type ="task" data-id="' + item["ID"] + '" onclick="openContent(tasksContent, this.dataset.id, this.dataset.type, request)"> ' + tasks.do + '</a></td>\n' +
+                                    '                <td class="text-center"><a href="#" data-type ="task" data-id="' + item["ID"] + '" onclick="openContent(tasksContent, this.dataset.id, this.dataset.type)"> ' + tasks.end + '</a></td>\n' +
+                                    '                <td class="text-center">\n' +
+                                    '                    <ul>\n' + groupList +
+                                    '                    </ul>\n' +
+                                    '                </td>\n'
+                            }
+
+                            if ($('#inp_crm').is(':checked')) {
+                                newRowContent += '                <td class="text-center"><a href="#" data-type ="leads" data-id="' + item["ID"] + '" onclick="openContent(leadsContent, this.dataset.id, this.dataset.type)">' + leads.open + '(' + leads.close + ')</a></td>\n' +
+                                    '                <td class="text-center"><a href="#" data-type ="deals" data-id="' + item["ID"] + '" onclick="openContent(dealsContent, this.dataset.id, this.dataset.type)">' + deals.open + '(' + deals.close + ')</a></td>\n' +
+                                    '                <td class="text-center"><a href="#" data-type ="contacts" data-id="' + item["ID"] + '" onclick="openContent(contactsContent, this.dataset.id, this.dataset.type)">' + contacts + '</a></td>\n' +
+                                    '                <td class="text-center"><a href="#" data-type ="activitys" data-id="' + item["ID"] + '" onclick="openContent(activitysContent, this.dataset.id, this.dataset.type)">' + activity.open + '(' + activity.close + ')</a></td>\n'
+                            }
+                            if ($('#inp_fillet').is(':checked')) {
+                                newRowContent += '<td class="text-center"><a href="#" data-type ="blogposts" data-id="' + item["ID"] + '" onclick="openContent(blogpostsContent, this.dataset.id, this.dataset.type)">' + blogpost + '</a></td>\n' +
+                                    '\n'
+                            }
+                            newRowContent += '</tr>';
+                            $("#content-table tbody").append(newRowContent);
+                            request.user.push(item)
+                        })
+                    })
+
+
+            });
+
+        }
+        });
+
+    }
+
+    function openContent(content,id, type, core) {
+        $("#sub-content-table thead").empty()
+        $("#sub-content-table tbody").empty()
+        if(type=='task') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+            '<td style="vertical-align: middle;" class="text-center"><strong>Группа</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Статус</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['RESPONSIBLE_ID']==id) {
+                    groupname="-"
+                    href = "#";
+                    ghref= "#";
+                    core.groups.forEach(function (group) {
+                        if(group['ID']==item['GROUP_ID']){
+                        groupname=group['NAME'];
+                            href = "https://"+domain+"/workgroups/group/"+group['ID']+"/tasks/task/view/"+item['ID']+"/"
+                        ghref = "https://"+domain+"/workgroups/group/"+group['ID']+"/";
+                        }else{
+                            href = "https://"+domain+"/company/personal/user/"+id+"/tasks/task/view/"+item['ID']+"/"
+                        }
+                    })
+                    statusi=""
+                    if (item['STATUS'] == 5) {
+                        statusi="Завершена"
+                    }
+                    else {
+                        statusi="Открыта"
+                    }
+                    dateCreate = item['CREATED_DATE'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center"><a href="'+href+'" target="_blank">' + item['TITLE'] + '</a></td>' +
+                        '<td class="text-center"><a href="'+ghref+'" target="_blank">' +  groupname + '</a></td>' +
+                        '<td class="text-center">' + statusi + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+       else if(type=='leads') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Статус</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['CREATED_BY_ID']==id) {
+                    groupname="-"
+                    href = "https://"+domain+"/crm/lead/details/"+item['ID']+"/";
+                    statusi=""
+                    if (item['OPENED'] !== 'Y') {
+                        statusi="Завершена"
+                    }
+                    else {
+                        statusi="Открыта"
+                    }
+                    dateCreate = item['DATE_CREATE'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center"><a href="'+href+'" target="_blank">' + item['TITLE'] + '</a></td>' +
+                        '<td class="text-center">' + statusi + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+        else if(type=='deals') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Статус</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['CREATED_BY_ID']==id) {
+                    groupname="-"
+                    href = "https://"+domain+"/crm/deal/details/"+item['ID']+"/";
+                    statusi=""
+                    if (item['CLOSED'] == 'Y') {
+                        statusi="Завершена"
+                    }
+                    else {
+                        statusi="Открыта"
+                    }
+                    dateCreate = item['DATE_CREATE'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center"><a href="'+href+'" target="_blank">' + item['TITLE'] + '</a></td>' +
+                        '<td class="text-center">' + statusi + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+        else if(type=='contacts') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Статус</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['CREATED_BY_ID']==id) {
+                    groupname="-"
+                    href = "https://"+domain+"/crm/contact/details/"+item['ID']+"/";
+                    statusi=""
+                    if (item['OPENED'] !== 'Y') {
+                        statusi="Завершен"
+                    }
+                    else {
+                        statusi="Открыт"
+                    }
+                    dateCreate = item['DATE_CREATE'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center"><a href="'+href+'" target="_blank">' + item['NAME'] + '</a></td>' +
+                        '<td class="text-center">' + statusi + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+        else if(type=='activitys') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Статус</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['AUTHOR_ID']==id) {
+                    groupname="-"
+                    statusi=""
+                    if (item['STATUS'] !== '1') {
+                        statusi="Завершен"
+                    }
+                    else {
+                        statusi="Открыт"
+                    }
+                    dateCreate = item['CREATED'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center">' + item['SUBJECT'] + '</td>' +
+                        '<td class="text-center">' + statusi + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+        else if(type=='blogposts') {
+            $("#sub-content-table thead").append('<tr role="row" class="odd">' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Дата создания</strong></td>' +
+                '<td style="vertical-align: middle;" class="text-center"><strong>Имя</strong></td>' +
+                '</tr>')
+            $('#content-table').hide()
+            $('#sub-content-table').show()
+            $('#global-menu').hide()
+            $('#sub-menu').show()
+            console.log(id)
+            content.forEach(function (item) {
+                if(item['AUTHOR_ID']==id) {
+                    groupname="-"
+                    statusi=""
+                    if (item['STATUS'] !== '1') {
+                        statusi="Завершен"
+                    }
+                    else {
+                        statusi="Открыт"
+                    }
+                    dateCreate = item['DATE_PUBLISH'].split('T')
+                    $("#sub-content-table thead").append('<tr class="even">' +
+                        '<td class="text-center">' + dateCreate[0] + '</td>' +
+                        '<td class="text-center">' + item['TITLE'] + '</td>' +
+                        '</tr>')
+                }
+                console.log(item)
+            })
+        }
+    }
+
+    function back() {
+        $('#content-table').show()
+        $('#sub-content-table').hide()
+        $('#global-menu').show()
+        $('#sub-menu').hide()
+    }
+</script>
+</body>
+</html>
